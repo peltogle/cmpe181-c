@@ -10,6 +10,10 @@
 #include <Adafruit_I2CDevice.h> // May not need
 #include <Adafruit_BusIO_Register.h> // May not need
 
+#include <WiFi.h>
+#include <ESP8266WiFi.h>
+
+
 // Preprocessor macros
 #define i2c_sda 4
 #define i2c_scl 5
@@ -23,7 +27,7 @@
 // Firebase + wifi stuff
 #define DATABASE_URL ""
 #define DATABASE_SECRET ""
-#define WIFI_SSID "SJSU_guest"
+#define WIFI_SSID "xfinitywifi"
 #define WIFI_PASSWORD ""
 
 // Function prototypes
@@ -36,8 +40,7 @@ void display_text(String input_text, int loc_x, int loc_y);
 float return_pm1();
 float return_pm2();
 float return_pm10();
-void printWifiData();
-void printError(int code, const String &msg);
+
 
 // Object setups
 // Temp/humi
@@ -73,7 +76,7 @@ void setup() {
   display.clearDisplay();
   // PMS
   pms.init();
-  
+
   // Demos:
   // Turn on LED
   control_led(true);
@@ -88,9 +91,29 @@ void setup() {
   // Grab one reading from PMS (both lines required)
   pms.read();
   Serial.println(" PM1.0: " + String(return_pm1()) + ", PM2.5: " + String(return_pm2()) + ", PM10: " + String(return_pm10()) + " [ug/m3]"); 
+
+  //Connecting to WiFi
+  Serial.print("Conncecting to ");
+  Serial.print(WIFI_SSID);
+  display_text("Connecting to Wifi", 0, 0);
+  WiFi.begin("xfinitywifi", "");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  display_text("Connected, IP address: " + WiFi.localIP(), 0, 0);
+  Serial.print("Connected, IP address: ");
+  Serial.println(WiFi.localIP());
+
 }
 
-void loop() {}
+
+void loop() 
+{
+
+}
 
 // Functions
 // Control led on/off
