@@ -8,7 +8,7 @@ import ufirebase as firebase
 import _thread as thread
 
 
-#wdt = WDT(timeout=5000) # 5 seconds timeout #wdt.feed()
+wdt = WDT(timeout=5000) # 5 seconds timeout #wdt.feed()
 i2c = I2C(0, scl=Pin(5), sda=Pin(4))
 shtc_sensor = SHTC3(i2c)
 lock = thread.allocate_lock()
@@ -70,7 +70,7 @@ def read_humi():
 i2c = I2C(0, scl=Pin(5), sda=Pin(4))
 oled = SSD1306_I2C(128, 64, i2c, addr=0x3C)
 
-# Display text on OLED with optional position and clearing
+# # Display text on OLED with optional position and clearing
 def write_to_display(text, x=0, y=0, clear=False):
     if clear:
         oled.fill(0)
@@ -114,7 +114,7 @@ def wifi_manager():
     #Initialize WiFi Interface
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-
+    print("--Wifi manager started--")
     if wlan.isconnected():
         print("Connected to WiFi")
         print("Network:",wlan.config('essid'))
@@ -134,22 +134,29 @@ def wifi_connect():
     ssid = input("Enter WiFi SSID: ")
     password = input("Enter WiFi password: ")
     wlan.disconnect()
-    wlan.connect(ssid, password)
     print("Connecting to WiFi...")
-    max_wait = 10
+    max_wait = 100 #wait for 10 seconds
+    animation = "|/-\\"
+    wlan.connect(ssid, password)
     while max_wait > 0:
         if wlan.status() < 0 or wlan.status() >= 3:
             break
+        print(animation[max_wait % len(animation)], end="\r")
         max_wait -= 1
-        print("waiting for connection...")
-        time.sleep(1)
+        time.sleep(0.1)
     if wlan.status() == 3:
         print("Connected to WiFi successfully")
         print("Connected to",ssid, wlan.ifconfig()[0]) 
         wlan.isconnected()
     else:
         print("WiFi connection failed")
-        
+        tryAgain = input("Try again? (Y/n): ")
+        if(tryAgain == "y" or tryAgain == "Y"):
+            wifi_connect()
+        elif(tryAgain == "n" or tryAgain == "N"):
+            print("Exiting WiFi manager.")
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
 def wifi_scan():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
